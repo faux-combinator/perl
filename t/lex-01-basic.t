@@ -32,7 +32,7 @@ ok lex(\@rules, '='), [$eq_token], "multiple rules can find first";
 ok lex(\@rules, '-'), [$dash_token], "multiple rules can find second";
 ok lex(\@rules, '_'), [$under_token], "multiple rules can find third";
 
-ok lex(\@rules, '=-_', [$eq_token, $dash_token, $under_token], "multiple rules can match all";
-ok lex(\@rules, '=-  _', [$eq_token, $dash_token, $under_token], "multiple rules can match all with space separation";
+ok lex(\@rules, '=-_'), [$eq_token, $dash_token, $under_token], "multiple rules can match all";
+ok lex(\@rules, '=-  _'), [$eq_token, $dash_token, $under_token], "multiple rules can match all with space separation";
 
 # TODO: add tests for [ qr/x/, y, sub {} ] form
