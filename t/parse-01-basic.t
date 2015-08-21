@@ -1,7 +1,7 @@
 use Modern::Perl;
 use lib 'lib/'; # <- bad!
 use Test::More;
-BEGIN { plan tests => 10 }
+BEGIN { plan tests => 5 }
 
 use FauxCombinator::Parser;
 
@@ -14,7 +14,6 @@ my $under_token = {type => 'under', value => '_'};
 # Test::More is just *broken*...
 # I need those `pass`es, otherwise, it... does strange stuff
 # (basically, it swaps the order of the subtest names -.-)
-pass 'expect';
 subtest '->expect()', sub {
   plan tests => 2;
 
@@ -37,7 +36,6 @@ subtest '->expect()', sub {
   }
 };
 
-pass 'try';
 subtest '->try()', sub {
   plan tests => 3;
 
@@ -69,7 +67,6 @@ subtest '->try()', sub {
   }
 };
 
-pass 'one_of';
 subtest '->one_of()', sub {
   plan tests => 5;
 
@@ -113,7 +110,6 @@ subtest '->one_of()', sub {
   }
 };
 
-pass 'any_of';
 subtest '->any_of()', sub {
   plan tests => 3;
 
@@ -141,7 +137,6 @@ subtest '->any_of()', sub {
   }
 };
 
-pass 'many_of';
 subtest '->many_of()', sub {
   plan tests => 3;
 
