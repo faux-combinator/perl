@@ -3,7 +3,7 @@ use Modern::Perl;
 
 sub new {
   my $tokens = shift;
-  push $tokens, {type => 'eof'};
+  push @$tokens, {type => 'eof'};
   bless {tokens => $tokens};
 }
 
