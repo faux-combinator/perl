@@ -20,10 +20,10 @@ sub lex {
           value => $mutate ? $mutate->($1) : $1
         };
         $code = substr($code, length($1));
+        $code =~ s/^$space+//;
         next part;
       }
     }
-    # TODO slice code not to be too big
     die "unable to match rule on this code: " . substr($code, 0, 15);
   }
   @tokens
