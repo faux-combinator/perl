@@ -5,7 +5,7 @@ use vars qw(@EXPORT_OK);
 
 @EXPORT_OK = qw(lex);
 
-my $space = qr/[ \t]/;
+my $space = qr/[ \t\n]/;
 
 sub lex {
   my @tokens;
