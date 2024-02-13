@@ -9,7 +9,7 @@ sub new {
 
 sub expect {
   my ($self, $type) = @_;
-  my $token = shift $self->{tokens};
+  my $token = shift @{$self->{tokens}};
   if ($token->{type} ne $type) {
     die "expected $type, found $token->{type}";
   }
