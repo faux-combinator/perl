@@ -1,15 +1,17 @@
 use Modern::Perl;
 use lib 'lib/'; # <- bad!
+use lib 't/';
 use Test::More;
+use helper;
 BEGIN { plan tests => 5 }
 
 use FauxCombinator::Parser;
 
-my $lparen_token = {type => 'lparen', value => '('};
-my $rparen_token = {type => 'rparen', value => ')'};
-my $eq_token = {type => 'eq', value => '='};
-my $dash_token = {type => 'dash', value => '-'};
-my $under_token = {type => 'under', value => '_'};
+my $lparen_token = tok('lparen', '(');
+my $rparen_token = tok('rparen', ')');
+my $eq_token = tok('eq', '=');
+my $dash_token = tok('dash', '-');
+my $under_token = tok('under', '_');
 
 # Test::More is just *broken*...
 # I need those `pass`es, otherwise, it... does strange stuff
@@ -24,15 +26,15 @@ subtest '->expect()', sub {
   };
 
   {
-    my @tokens = ($lparen_token, $rparen_token);
+    my @tokens = ($lparen_token->(1, 0), $rparen_token->(1, 1));
     is $parse->(\@tokens), 'rparen',
       "it parses";
   }
 
   {
-    my @tokens = ($eq_token);
+    my @tokens = ($eq_token->(1, 0));
     eval { $parse->(\@tokens) };
-    ok $@, "it checks arguments";
+    like $@, qr/expected lparen, found eq at 1:0 - 1:1/, "it checks arguments";
   }
 };
 
@@ -48,22 +50,21 @@ subtest '->try()', sub {
   };
 
   {
-    my @tokens = ($lparen_token, $rparen_token);
+    my @tokens = ($lparen_token->(1, 0), $rparen_token->(1, 0));
     ok $parse->(\@tokens),
       "maybe tokens are optional";
   }
 
   {
-    my @tokens = ($lparen_token, $eq_token, $rparen_token);
+    my @tokens = ($lparen_token->(1, 0), $eq_token->(1, 1), $rparen_token->(1, 2));
     ok $parse->(\@tokens),
       "it matches optional tokens";
   }
 
   {
-    my @tokens = ($lparen_token, $dash_token, $rparen_token);
+    my @tokens = ($lparen_token->(1, 0), $dash_token->(1, 1), $rparen_token->(1, 2));
     eval { $parse->(\@tokens) };
-    ok $@,
-      "optional tokens are checked";
+    like $@, qr/expected rparen, found dash at 1:1 - 1:2/, "optional tokens are checked";
   }
 };
 
@@ -80,19 +81,19 @@ subtest '->one_of()', sub {
   };
 
   {
-    my @tokens = ($eq_token);
+    my @tokens = ($eq_token->(1, 0));
     is $parse->(\@tokens), 'eq',
       "one_of can match first case";
   }
 
   {
-    my @tokens = ($dash_token);
+    my @tokens = ($dash_token->(1, 0));
     is $parse->(\@tokens), 'dash',
       "one_of can match second case";
   }
 
   {
-    my @tokens = ($under_token);
+    my @tokens = ($under_token->(1, 0));
     is $parse->(\@tokens), 'under',
       "one_of can match third case";
   }
@@ -100,13 +101,13 @@ subtest '->one_of()', sub {
   {
     my @tokens = ();
     eval { $parse->(\@tokens) };
-    ok $@, "one_of still requires a token";
+    like $@, qr/unable to parse one_of/, "one_of still requires a token";
   }
 
   {
-    my @tokens = ($lparen_token);
+    my @tokens = ($lparen_token->(1, 0));
     eval { $parse->(\@tokens) };
-    ok $@, "one_of doesn't allow any token";
+    like $@, qr/unable to parse one_of at 1:0 - 1:1/, "one_of doesn't allow any token";
   }
 };
 
@@ -125,13 +126,13 @@ subtest '->any_of()', sub {
   }
 
   {
-    my @tokens = ($eq_token);
+    my @tokens = ($eq_token->(1, 0));
     is_deeply $parse->(\@tokens), ['='],
       "can parse one ocurrence";
   }
 
   {
-    my @tokens = ($eq_token, $eq_token, $eq_token);
+    my @tokens = ($eq_token->(1, 0), $eq_token->(1, 0), $eq_token->(1, 0));
     is_deeply $parse->(\@tokens), ['=', '=', '='],
       "can parse many occurences";
   }
@@ -148,19 +149,18 @@ subtest '->many_of()', sub {
   {
     my @tokens = ();
     eval { $parse->(\@tokens) };
-    ok $@, "CANNOT parse zero occurence";
+    like $@, qr/expected eq, found eof/, "CANNOT parse zero occurence";
   }
 
   {
-    my @tokens = ($eq_token);
+    my @tokens = ($eq_token->(1, 0));
     is_deeply $parse->(\@tokens), ['='],
       "can parse one ocurrence";
   }
 
   {
-    my @tokens = ($eq_token, $eq_token, $eq_token);
+    my @tokens = ($eq_token->(1, 0), $eq_token->(1, 0), $eq_token->(1, 0));
     is_deeply $parse->(\@tokens), ['=', '=', '='],
       "can parse many occurences";
   }
 };
-

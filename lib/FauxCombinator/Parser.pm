@@ -3,15 +3,35 @@ use Modern::Perl;
 
 sub new {
   my $tokens = shift;
-  push @$tokens, {type => 'eof'};
+  my $last = $tokens->[-1];
+  if ($last) {
+    push @$tokens, {type => 'eof'};
+  } else {
+    my $eof_pos = $last->{end};
+    push @$tokens, {type => 'eof', start => $eof_pos, end => $eof_pos};
+  }
   bless {tokens => $tokens};
+}
+
+sub peek {
+  my ($self) = @_;
+  @{$self->{tokens}}[0];
+}
+
+sub _token_loc {
+  my ($token) = @_;
+  if ($token && $token->{start} && $token->{end}) {
+    " at $token->{start}{line}:$token->{start}{column} - $token->{end}{line}:$token->{end}{column}";
+  } else {
+    "";
+  }
 }
 
 sub expect {
   my ($self, $type) = @_;
   my $token = shift @{$self->{tokens}};
   if ($token->{type} ne $type) {
-    die "expected $type, found $token->{type}";
+    die "expected $type, found $token->{type}" . _token_loc($token);
   }
   $token;
 }
@@ -27,6 +47,7 @@ sub try {
   my ($self, $match) = @_;
   my @tokens = @{ $self->{tokens} };
 
+  local $@;
   my $value = eval { $self->match($match); };
   if (!$@) {
     return $value;
@@ -42,7 +63,8 @@ sub one_of {
       return $value;
     }
   }
-  die "unable to parse one_of";
+
+  die "unable to parse one_of" . _token_loc($self->peek);
 }
 
 sub any_of {
